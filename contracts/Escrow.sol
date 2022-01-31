@@ -1,9 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 contract Escrow is Initializable {
+	// console.log("creating new escrow");
 	address public arbiter;
 	address payable public beneficiary;
 	address public depositor;
