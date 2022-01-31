@@ -16,6 +16,11 @@ npx hardhat help
 
 ## .env setup
 
-RINKEBY_URL=
-RINKEBY_PRIVATE_KEY=
-ETHERSCAN_KEY=
+`RINKEBY_URL=`
+`RINKEBY_PRIVATE_KEY=`
+`ETHERSCAN_KEY=`
+
+## verification
+
+`npx hardhat verify EscrowProxyFactory_rinkeby_address --network rinkeby Escrow_contract_address`
+`npx hardhat verify Escrow_rinkeby_address --network rinkeby`
