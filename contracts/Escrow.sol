@@ -6,24 +6,24 @@ import "hardhat/console.sol";
 
 contract Escrow is Initializable {
 	// console.log("creating new escrow");
-	address public arbiter;
-	address payable public beneficiary;
-	address public depositor;
+	address public freeflow;
+	address payable public dev;
+	address public client;
 
 	bool public isApproved;
 
-	function initialize(address _arbiter, address payable _beneficiary, address _depositor) public payable initializer {
-		arbiter = _arbiter;
-		beneficiary = _beneficiary;
-		depositor = _depositor;
+	function initialize(address _freeflow, address payable _dev, address _client) public payable initializer {
+		freeflow = _freeflow;
+		dev = _dev;
+		client = _client;
 	}
 
 	event Approved(uint);
 
 	function releaseFunds() external {
-		require(msg.sender == arbiter);
+		require(msg.sender == freeflow);
 		uint balance = address(this).balance;
-		beneficiary.transfer(balance);
+		dev.transfer(balance);
 		emit Approved(balance);
 		isApproved = true;
 	}

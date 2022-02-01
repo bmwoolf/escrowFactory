@@ -17,9 +17,9 @@ contract EscrowProxyFactory is Ownable {
 		implementationContract = _implementation;
 	}
 
-	function createNewEscrow(address _arbiter, address payable _beneficiary, address _depositor) payable external returns(address instance) {
+	function createNewEscrow(address _freeflow, address payable _dev, address _client) payable external returns(address instance) {
 		instance = Clones.clone(implementationContract);
-		(bool success, ) = instance.call{value: msg.value}(abi.encodeWithSignature("initialize(address,address,address)", _arbiter, _beneficiary, _depositor));
+		(bool success, ) = instance.call{value: msg.value}(abi.encodeWithSignature("initialize(address,address,address)", _freeflow, _dev, _client));
 		allClones.push(instance);
 		emit NewClone(instance);
 		return instance;
