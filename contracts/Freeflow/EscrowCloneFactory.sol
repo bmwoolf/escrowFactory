@@ -3,6 +3,7 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
+
 contract EscrowCloneFactory {
     address public implementationContract;
     address public immutable freeflow;
