@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.6;
 
-import {SafeERC20} from './utils/SafeERC20.sol';
-import {IERC20} from "./utils/IERC20.sol";
-import "./utils/ReentrancyGuardUpgradeable.sol";
+// import {SafeERC20} from './utils/SafeERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
 
 contract EscrowClone is ReentrancyGuard, Initializable {
     using SafeERC20 for IERC20;
