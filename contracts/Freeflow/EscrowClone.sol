@@ -22,22 +22,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     event FreeflowWithdrawal(address dev, uint256 amount);
     event Refund(address client, uint256 amount);
 
-
-    /// @notice we need to capture the type of token that they are trying to deposit
-    constructor(address _freeflow, address _client, address _dev, uint256 _initialAmount) payable {
-        freeflow = _freeflow;
-        client = _client;
-        dev = _dev;
-        totalAmount = _initialAmount;
-    }
-
-    /// @notice Need to make it so this can only ever be called once
-    function initialize(address payable _freeflow, address payable _dev, address _client) public payable initializer nonReentrant {
-        freeflow = _freeflow;
-        dev = _dev;
-        client = _client;
-    }
-
     modifier onlyClient() {
         require(msg.sender == client);
         _;
@@ -56,6 +40,13 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     modifier onlyFreeflowOrClient() {
         require(msg.sender == freeflow || msg.sender == client, "Only the freeflow account or client can withdraw the funds.");
         _;
+    }
+
+    /// @notice Need to make it so this can only ever be called once
+    function initialize(address payable _freeflow, address payable _dev, address _client) public payable initializer {
+        freeflow = _freeflow;
+        dev = _dev;
+        client = _client;
     }
 
     //////////////////////////////////////////////////
@@ -79,6 +70,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @param _tokenAddress The address of the token to deposit
     function depositToken(uint256 _amount, IERC20 _tokenAddress) public payable onlyClient {
         require(_amount > 0, "Cannot deposit 0 tokens.");
+        
         /// @notice do we need to track balances locally like an ERC20 contract?
         SafeERC20.safeTransferFrom(_tokenAddress, msg.sender, address(this), _amount);
         tokenContractAddress = _tokenAddress;
