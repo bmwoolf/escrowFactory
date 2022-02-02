@@ -51,6 +51,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         dev = _dev;
         freeflow = _freeflow;
         isETH = _isETH;
+        freeflowCut = 15;
     }
 
     //////////////////////////////////////////////////
@@ -63,9 +64,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
         isETH = true;
         totalAmount += msg.value;
-        /// TODO switch to transferFrom
-        payable(address(this)).transfer(msg.value);
-        //payable(client).transfer(msg.value);
 
         emit Deposit(msg.sender, msg.value);
     }
@@ -85,7 +83,8 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @dev   Transfer from this smart contract to the dev
     /// @param withdrawAmount The amount to withdraw for the client
-    function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
+    function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient {
+        //TODO: make sure there is something to withdraw
         uint256 freeflowShare = (withdrawAmount * 100) / freeflowCut;
         uint256 devShare = withdrawAmount - freeflowShare;
         
