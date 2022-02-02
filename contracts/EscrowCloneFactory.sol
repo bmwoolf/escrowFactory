@@ -6,29 +6,28 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract EscrowCloneFactory {
     address public implementationContract;
-    address public immutable freeflow;
     
     address[] public allClones;
 
     event EscrowCloneDeployed(address _clone);
-
+    
+    /// @dev Client launches the escrow contract 
     constructor(address _implementation) {
         implementationContract = _implementation;
-        freeflow = msg.sender;
     }
 
-    function createNewEscrow(address freeflow, address _payer, address payable _payee, uint256 _initialAmount) payable external returns (address instance) {
+    function createNewEscrow(address _client, address payable _dev, address payable _freeflow, bool isEth) payable external returns (address instance) {
         instance = Clones.clone(implementationContract);
         
         (bool success, ) = instance.call{
             value: msg.value
             }(
                 abi.encodeWithSignature(
-                    "initialize(address,address,address)", 
-                    freeflow,
-                    _payer,
-                    _payee,
-                    _initialAmount
+                    "initialize(address,address,address,bool)", 
+                    _client,
+                    _dev,
+                    _freeflow,
+                    isEth
                 ));
 
         allClones.push(instance);

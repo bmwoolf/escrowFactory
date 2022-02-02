@@ -14,10 +14,11 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     address public client;
     address public dev;
     address public freeflow;
+    bool public isETH;
     uint256 public totalAmount;
     uint256 public freeflowCut = 15;
     IERC20 public tokenContractAddress;
-    bool isETH = false;
+    //bool isETH = false;
 
     event Deposit(address client, uint256 amount);
     event DevWithdrawal(address dev, uint256 amount);
@@ -45,10 +46,11 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     }
 
     /// @notice Need to make it so this can only ever be called once
-    function initialize(address payable _freeflow, address payable _dev, address _client) public payable initializer {
-        freeflow = _freeflow;
-        dev = _dev;
+    function initialize(address _client, address payable _dev, address payable _freeflow, bool _isETH) public payable initializer {
         client = _client;
+        dev = _dev;
+        freeflow = _freeflow;
+        isETH = _isETH;
     }
 
     //////////////////////////////////////////////////
@@ -63,6 +65,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         totalAmount += msg.value;
         /// TODO switch to transferFrom
         payable(address(this)).transfer(msg.value);
+        //payable(client).transfer(msg.value);
 
         emit Deposit(msg.sender, msg.value);
     }

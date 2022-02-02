@@ -1,24 +1,48 @@
 require("@nomiclabs/hardhat-waffle");
+require('dotenv').config({path: ".env"})
 require("@nomiclabs/hardhat-etherscan");
-require("dotenv").config();
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+const KOVAN_INFURA_ENDPOINT = process.env.KOVAN_INFURA_ENDPOINT;
+const RINKEBY_INFURA_ENDPOINT = process.env.RINKEBY_INFURA_ENDPOINT;
+const ETHERSCAN_API = process.env.ETHERSCAN_API;
+const PRIVATE_KEY1 = process.env.PRIVATE_KEY1;
+const PRIVATE_KEY2 = process.env.PRIVATE_KEY2;
 
 module.exports = {
-  solidity: "0.8.11",
+  defaultNetwork: "rinkeby",
   networks: {
-    rinkeby: {
-      url: process.env.RINKEBY_URL,
-      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    localhost: {
+      url: "http://127.0.0.1:8545",
     },
+    kovan: {
+      url: KOVAN_INFURA_ENDPOINT,
+      accounts: [PRIVATE_KEY1, PRIVATE_KEY2]
+    },
+    rinkeby: {
+      url: RINKEBY_INFURA_ENDPOINT,
+      accounts: [PRIVATE_KEY1, PRIVATE_KEY2],
+      gas: "auto",
+    }
+  },
+  solidity: {
+    version: "0.8.11",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_KEY,
+    apiKey: ETHERSCAN_API
   },
-};
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+  mocha: {
+    timeout: 2000000
+  }
+}
