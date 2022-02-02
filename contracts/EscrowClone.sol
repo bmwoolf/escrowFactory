@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 
 contract EscrowClone is ReentrancyGuard, Initializable {
@@ -85,7 +86,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @param withdrawAmount The amount to withdraw for the client
     function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient {
         //TODO: make sure there is something to withdraw
-        uint256 freeflowShare = (withdrawAmount * 100) / freeflowCut;
+        uint256 freeflowShare = withdrawAmount / freeflowCut * 100;
         uint256 devShare = withdrawAmount - freeflowShare;
         
         payable(freeflow).transfer(freeflowShare);
