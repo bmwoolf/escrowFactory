@@ -17,7 +17,7 @@ contract EscrowCloneFactory {
         freeflow = msg.sender;
     }
 
-    function createNewEscrow(address freeflow, address _payer, address payable _payee, uint256 _initialAmount) payable external returns (address instance) {
+    function createNewEscrow(address freeflow, address _client, address payable _payee, uint256 _initialAmount) payable external returns (address instance) {
         instance = Clones.clone(implementationContract);
         
         (bool success, ) = instance.call{
@@ -26,7 +26,7 @@ contract EscrowCloneFactory {
                 abi.encodeWithSignature(
                     "initialize(address,address,address)", 
                     freeflow,
-                    _payer,
+                    _client,
                     _payee,
                     _initialAmount
                 ));
