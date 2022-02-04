@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.6;
 
-// import {SafeERC20} from './utils/SafeERC20.sol';
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -18,7 +17,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     uint256 public totalAmount;
     uint256 public freeflowCut = 15;
     IERC20 public tokenContractAddress;
-    //bool isETH = false;
 
     event Deposit(address client, uint256 amount);
     event DevWithdrawal(address dev, uint256 amount);
@@ -83,7 +81,8 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @dev   Transfer from this smart contract to the dev
     /// @param withdrawAmount The amount to withdraw for the client
-    function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient {
+    // function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
+    function withdrawETH(uint256 withdrawAmount) public {
         //TODO: make sure there is something to withdraw
         uint256 freeflowShare = (withdrawAmount * 100) / freeflowCut;
         uint256 devShare = withdrawAmount - freeflowShare;
