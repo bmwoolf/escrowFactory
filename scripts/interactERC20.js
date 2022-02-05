@@ -3,7 +3,7 @@ const { constants, BigNumber, utils } = require("ethers");
 const hre = require("hardhat");
 
 const ERC20 = require("../artifacts/contracts/Fake1ERC20.sol/Fake1ERC20.json")
-const ESCROW_CLONE = "0xF2db45F9778fd8922b9CE9e5BFf398b5aEaBb4eB";
+const ESCROW_CLONE = "0xf7f5Fc961A476921EFbAc80D6B3810B849440Dca";
 const ESCROW_CLONE_ABI = require("../artifacts/contracts/EscrowClone.sol/EscrowClone.json");
 
 async function main() {
@@ -13,8 +13,6 @@ async function main() {
   const [client, dev]  = await ethers.getSigners();
 
   const escrowContract = new ethers.Contract(ESCROW_CLONE, ESCROW_CLONE_ABI.abi, client);
-
-  console.log(client.address)
 
   // Make fake ERC20 to pass into escrow (minted by client in constructor)
   const ERC20 = await ethers.getContractFactory("Fake1ERC20");
@@ -31,7 +29,7 @@ async function main() {
 //   await clientBalance.wait();
 //   console.log("Client balance before deposit:", clientBalance);
   // Deposit client funds
-  const tx = await escrowContract.connect(client).depositToken("500", erc20.address);
+  const tx = await escrowContract.connect(client).depositToken(500, erc20.address);
   await tx.wait();
   // Get total amount in escrow
   const contractBalance = await escrowContract.totalAmount();

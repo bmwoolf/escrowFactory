@@ -73,7 +73,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         require(_amount > 0, "Cannot deposit 0 tokens.");
         
         /// @notice do we need to track balances locally like an ERC20 contract?
-        SafeERC20.safeTransferFrom(_tokenAddress, msg.sender, address(this), _amount);
+        SafeERC20.safeTransferFrom(IERC20(_tokenAddress), msg.sender, address(this), _amount);
         tokenContractAddress = _tokenAddress;
 
         totalAmount += _amount;
@@ -84,7 +84,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev   Transfer from this smart contract to the dev
     // function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
     function withdrawETH() onlyFreeflowOrClient nonReentrant public payable {
-        require(address(this).balance >= msg.value, "Not that much ETH in the contract");
+        require(address(this).balance >= msg.value, "Trying to withdraw more ETH than in the contract");
         uint256 freeflowShare = msg.value / 100 * freeflowCut;
         uint256 devShare = msg.value - freeflowShare;
         
@@ -98,13 +98,15 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev   Transfer ERC20 token from this smart contract to the dev
     /// @param _amount The amount to withdraw for the client
     function withdrawERC20(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
-        uint256 freeflowShare = (_amount * 100) / freeflowCut;
+        uint256 contractERC20Balance = IERC20(tokenContractAddress).balanceOf(address(this));
+        require (contractERC20Balance >= _amount, "Trying to withdraw more ERC20s than in the contract");
+        uint256 freeflowShare = _amount / 100 * freeflowCut;
         totalAmount -= freeflowShare;
         uint256 devShare = _amount - freeflowShare;
         totalAmount -= devShare;
     
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), dev, devShare);
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), freeflow, freeflowShare);
+        SafeERC20.safeTransferFrom(IERC20(tokenContractAddress), address(this), dev, devShare);
+        SafeERC20.safeTransferFrom(IERC20(tokenContractAddress), address(this), freeflow, freeflowShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
