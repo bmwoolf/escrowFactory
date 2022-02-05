@@ -11,8 +11,8 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     using SafeERC20 for IERC20;
 
     address public client;
-    address public dev;
-    address public freeflow;
+    address payable public dev;
+    address payable public freeflow;
     bool public isETH;
     uint256 public totalAmount;
     uint256 public freeflowCut = 15;
@@ -80,15 +80,14 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     }
 
     /// @dev   Transfer from this smart contract to the dev
-    /// @param withdrawAmount The amount to withdraw for the client
     // function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
-    function withdrawETH(uint256 withdrawAmount) public {
-        //TODO: make sure there is something to withdraw
-        uint256 freeflowShare = (withdrawAmount * 100) / freeflowCut;
-        uint256 devShare = withdrawAmount - freeflowShare;
+    function withdrawETH() onlyFreeflowOrClient nonReentrant public payable {
+        require(address(this).balance <= msg.value, "Not that much ETH in the contract");
+        uint256 freeflowShare = msg.value / 100 * freeflowCut;
+        uint256 devShare = msg.value - freeflowShare;
         
-        payable(freeflow).transfer(freeflowShare);
-        payable(dev).transfer(devShare);
+        freeflow.transfer(freeflowShare);
+        dev.transfer(devShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
