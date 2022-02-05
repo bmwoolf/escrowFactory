@@ -3,7 +3,7 @@ const { constants, BigNumber, utils } = require("ethers");
 const hre = require("hardhat");
 
 const ERC20 = require("../artifacts/contracts/Fake1ERC20.sol/Fake1ERC20.json")
-const ESCROW_CLONE = "0x833166dD8cc477513ae8aaba066da013067f094F";
+const ESCROW_CLONE = "0x389332545088Ea706796C168d5Fce435deE48Af8";
 const ESCROW_CLONE_ABI = require("../artifacts/contracts/EscrowClone.sol/EscrowClone.json");
 
 async function main() {

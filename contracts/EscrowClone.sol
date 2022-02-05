@@ -69,12 +69,14 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev   Transfer ERC20 token from the client to this smart contract
     /// @param _amount The new amount to deposit
     /// @param _tokenAddress The address of the token to deposit
-    function depositToken(uint256 _amount, IERC20 _tokenAddress) public payable onlyClient {
+    function depositToken(uint256 _amount, IERC20 _tokenAddress) public onlyClient {
         require(_amount > 0, "Cannot deposit 0 tokens.");
         
         /// @notice do we need to track balances locally like an ERC20 contract?
         SafeERC20.safeTransferFrom(_tokenAddress, msg.sender, address(this), _amount);
         tokenContractAddress = _tokenAddress;
+
+        totalAmount += _amount;
 
         emit Deposit(msg.sender, _amount);
     }
@@ -82,7 +84,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev   Transfer from this smart contract to the dev
     // function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
     function withdrawETH() onlyFreeflowOrClient nonReentrant public payable {
-        require(address(this).balance <= msg.value, "Not that much ETH in the contract");
+        require(address(this).balance >= msg.value, "Not that much ETH in the contract");
         uint256 freeflowShare = msg.value / 100 * freeflowCut;
         uint256 devShare = msg.value - freeflowShare;
         
