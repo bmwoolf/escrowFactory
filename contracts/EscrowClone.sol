@@ -104,14 +104,14 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         totalAmount -= freeflowShare;
         uint256 devShare = _amount - freeflowShare;
         totalAmount -= devShare;
-    
+
+        SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), _amount); 
         SafeERC20.safeTransferFrom(IERC20(tokenContractAddress), address(this), dev, devShare);
         SafeERC20.safeTransferFrom(IERC20(tokenContractAddress), address(this), freeflow, freeflowShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
     }
-
 
     //////////////////////////////////////////////////
     /////////            REFUNDS            //////////
