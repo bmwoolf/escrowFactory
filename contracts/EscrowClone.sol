@@ -123,6 +123,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         
         if (!isETH) {
             totalAmount = 0;
+            SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), tempTotalAmount); 
             SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client,  tempTotalAmount);
         } else {
             /// @notice require(address(this.balance) == totalAmount);
@@ -137,6 +138,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     function refundClientMilestone(uint256 _amount) public onlyFreeflow nonReentrant {
         if (!isETH) {
             totalAmount -= _amount;
+            SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), _amount); 
             SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client, _amount);
         } else if (isETH) {
             require(_amount <= address(this).balance, "Cannot refund more than the total amount.");
