@@ -17,10 +17,10 @@ async function main() {
   console.log(escrow.address, "Escrow base contract address");
   console.log(epf.address, "Minimal Proxy Escrow Factory contract address");
 
-  // const ERC1 = await ethers.getContractFactory("Fake1ERC20");
-  // e1 = await ERC1.connect(owner).deploy(deployAmount);
-  // await e1.deployed();
-  // console.log("Fake1ERC20 deployed to", e1.address);
+  const ERC1 = await ethers.getContractFactory("Fake1ERC20");
+  e1 = await ERC1.connect(owner).deploy(deployAmount);
+  await e1.deployed();
+  console.log("Fake1ERC20 deployed to", e1.address);
 }
 
 main()
