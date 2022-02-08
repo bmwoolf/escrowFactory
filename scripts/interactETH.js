@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 const { constants, BigNumber, utils } = require("ethers");
 const hre = require("hardhat");
 
-const ESCROW_CLONE = "0xb20806E356A9293eF75f266081C31dF9DB4c4eBc";
+const ESCROW_CLONE = "0x98bEF8Ef2a153d403b93ddEBD664B86Fe68c3006";
 const ESCROW_CLONE_ABI = require("../artifacts/contracts/EscrowClone.sol/EscrowClone.json");
 
 async function main() {
