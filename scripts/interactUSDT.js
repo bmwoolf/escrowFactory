@@ -2,7 +2,9 @@ const { ethers } = require("hardhat");
 const { constants, BigNumber, utils } = require("ethers");
 const hre = require("hardhat");
 
-const ESCROW_CLONE = "0x98bEF8Ef2a153d403b93ddEBD664B86Fe68c3006";
+const ERC20 = require("../artifacts/contracts/Fake1ERC20.sol/Fake1ERC20.json")
+const ESCROW_CLONE = "0x6BFE26615680a7b54b845AF7beA5a00fc548DC66";
+const USDT_RINKEBY = "0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02";
 const ESCROW_CLONE_ABI = require("../artifacts/contracts/EscrowClone.sol/EscrowClone.json");
 
 async function main() {
@@ -13,31 +15,35 @@ async function main() {
 
   const escrowContract = new ethers.Contract(ESCROW_CLONE, ESCROW_CLONE_ABI.abi, client);
 
+  usdtContract = new ethers.Contract(USDT_RINKEBY, ERC20.abi, client);
+
+  // Approve depositing the USDT into the contract
+  const clientApprove = await usdtContract.connect(client).approve(ESCROW_CLONE, utils.parseUnits("2", 18));
+  clientApprove.wait();
+  console.log("Client approved Rinkeby USDT...");
+  
   // Get initial client balance
-  const clientBalance = await provider.getBalance(client.address);
+  const clientBalance = await usdtContract.balanceOf(client.address);
   console.log("Client balance before deposit:", utils.formatEther(clientBalance));
   
   // Deposit client funds
-  const tx = await escrowContract.connect(client).depositETH({ value: utils.parseEther('0.01') });
+  const tx = await escrowContract.connect(client).depositERC20(utils.parseUnits("1", 18), USDT_RINKEBY);
   await tx.wait();
   // Get total amount in escrow
   const contractBalance = await escrowContract.totalAmount();
   console.log("Contract balance after deposit:", utils.formatEther(contractBalance));
-  
   // Get balance of client after deposit
-  const clientBalanceAfterDeposit = await provider.getBalance(client.address);
+  const clientBalanceAfterDeposit = await usdtContract.balanceOf(client.address);
   console.log("Client balance after deposit:", utils.formatEther(clientBalanceAfterDeposit));
 
   // Get balance of dev before
-  const devBalance = await provider.getBalance(dev.address);
+  const devBalance = await usdtContract.balanceOf(dev.address);
   console.log("Dev balance before withdraw:", utils.formatEther(devBalance));
-  
   // Withdraw from escrow called by client
-  const withdraw = await escrowContract.connect(client).withdrawETH({ value: utils.parseEther('0.01') });
+  const withdraw = await escrowContract.connect(client).withdrawERC20(utils.parseUnits("1", 18));
   await withdraw.wait();
-  
   // Get balance of dev after withdraw
-  const devBalanceAfterWithdraw = await provider.getBalance(dev.address);
+  const devBalanceAfterWithdraw = await usdtContract.balanceOf(dev.address);
   console.log("Dev balance after withdraw:", utils.formatEther(devBalanceAfterWithdraw));
 
 }

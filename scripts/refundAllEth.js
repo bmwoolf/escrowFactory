@@ -2,8 +2,10 @@ const { ethers } = require("hardhat");
 const { constants, BigNumber, utils } = require("ethers");
 const hre = require("hardhat");
 
-const ESCROW_CLONE = "0x98bEF8Ef2a153d403b93ddEBD664B86Fe68c3006";
+const ESCROW_CLONE = "0xd965A6517Ecd6763e9f0b974722487509b094607";
 const ESCROW_CLONE_ABI = require("../artifacts/contracts/EscrowClone.sol/EscrowClone.json");
+
+// This won't work because these functions are to be called by freeflow and I don't have their keys!
 
 async function main() {
   const network = 'rinkeby' // use rinkeby testnet
@@ -20,6 +22,7 @@ async function main() {
   // Deposit client funds
   const tx = await escrowContract.connect(client).depositETH({ value: utils.parseEther('0.01') });
   await tx.wait();
+
   // Get total amount in escrow
   const contractBalance = await escrowContract.totalAmount();
   console.log("Contract balance after deposit:", utils.formatEther(contractBalance));
@@ -28,17 +31,13 @@ async function main() {
   const clientBalanceAfterDeposit = await provider.getBalance(client.address);
   console.log("Client balance after deposit:", utils.formatEther(clientBalanceAfterDeposit));
 
-  // Get balance of dev before
-  const devBalance = await provider.getBalance(dev.address);
-  console.log("Dev balance before withdraw:", utils.formatEther(devBalance));
-  
-  // Withdraw from escrow called by client
-  const withdraw = await escrowContract.connect(client).withdrawETH({ value: utils.parseEther('0.01') });
+  // Refund from escrow called by client
+  const withdraw = await escrowContract.connect(client).refundClientAll();
   await withdraw.wait();
   
-  // Get balance of dev after withdraw
-  const devBalanceAfterWithdraw = await provider.getBalance(dev.address);
-  console.log("Dev balance after withdraw:", utils.formatEther(devBalanceAfterWithdraw));
+  // Get balance of client after refund
+  const clientBalanceAfterRefund = await provider.getBalance(client.address);
+  console.log("Client balance after refund:", utils.formatEther(clientBalanceAfterRefund));
 
 }
 
