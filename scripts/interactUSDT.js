@@ -18,7 +18,7 @@ async function main() {
   usdtContract = new ethers.Contract(USDT_RINKEBY, ERC20.abi, client);
 
   // Approve depositing the USDT into the contract
-  const clientApprove = await usdtContract.connect(client).approve(ESCROW_CLONE, 10000000000000000000000000000000);
+  const clientApprove = await usdtContract.connect(client).approve(ESCROW_CLONE, utils.parseUnits("2", 18));
   clientApprove.wait();
   console.log("Client approved Rinkeby USDT...");
   
@@ -27,7 +27,7 @@ async function main() {
   console.log("Client balance before deposit:", utils.formatEther(clientBalance));
   
   // Deposit client funds
-  const tx = await escrowContract.connect(client).depositERC20(10000000000000000000000000000000, USDT_RINKEBY);
+  const tx = await escrowContract.connect(client).depositERC20(utils.parseUnits("1", 18), USDT_RINKEBY);
   await tx.wait();
   // Get total amount in escrow
   const contractBalance = await escrowContract.totalAmount();
@@ -40,7 +40,7 @@ async function main() {
   const devBalance = await usdtContract.balanceOf(dev.address);
   console.log("Dev balance before withdraw:", utils.formatEther(devBalance));
   // Withdraw from escrow called by client
-  const withdraw = await escrowContract.connect(client).withdrawERC20(10000000000000000000000000000000);
+  const withdraw = await escrowContract.connect(client).withdrawERC20(utils.parseUnits("1", 18));
   await withdraw.wait();
   // Get balance of dev after withdraw
   const devBalanceAfterWithdraw = await usdtContract.balanceOf(dev.address);

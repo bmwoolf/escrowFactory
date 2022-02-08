@@ -130,7 +130,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
             SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), tempTotalAmount); 
             SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client,  tempTotalAmount);
         } else {
-            require(address(this).balance == totalAmount, "Total amount and contract balance are off");
             payable(client).transfer(tempTotalAmount);
         }
 
