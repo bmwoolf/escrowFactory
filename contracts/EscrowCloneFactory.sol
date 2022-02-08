@@ -16,6 +16,7 @@ contract EscrowCloneFactory {
         implementationContract = _implementation;
     }
 
+    /// @dev Client deploys the escrow contract
     function createNewEscrow(address _client, address payable _dev, address payable _freeflow, bool isEth) payable external returns (address instance) {
         instance = Clones.clone(implementationContract);
         
