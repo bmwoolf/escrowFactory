@@ -10,6 +10,7 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 * `interactUSDC.js` will do the same with 1 USD coin.
 
 ## Other Notes
+* **The current contract is setup pointing to Rinkeby addresses for USDC and USDT, replace them with mainnet addresses before deploying to mainnet!!!!**
 * Be congnicent that you will need to account for the correct decimals, e.g. Ethereum is 1^18 while USDT/USDC are 1^6 (for some reason testnet USDT is 1^18). There are tools in `ethers.js` to help you with this or you can do the math if interacting with the variable inputs for the functions on Etherscan.
 * Sometimes testnets can be finicky. If the testing scripts fail, try running them again if they got hung or give an error about gas. Another thing to check is Rinkeby has also been stalling out on blocks, not indexing TX's quickly and going down for a few hours every now and then. For this reason, I also recommend using small amounts of ether or USDC/USDT in these tests.
 * Only USDC and USDT are accepted for the ERC20 functions.
