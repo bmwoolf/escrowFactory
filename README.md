@@ -22,7 +22,7 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
   `PRIVATE_KEY2=""`  
 4. modify `createNewEscrow()` and pass in `client`, `dev`, `freeFlow`, and `true` or `false` if the escrow contract deals in ether or not
 5. `npx hardhat run scripts/deployNewEscrowEthAndERC20.js --network rinkeby`
-6. `npx hardhat verify [contract_address] --network rinkeby` (run this for both contracts)
+6. no need to verify the contracts, the `deployNewEscrowEthAndERC20` script will take care of it
 
 
 
