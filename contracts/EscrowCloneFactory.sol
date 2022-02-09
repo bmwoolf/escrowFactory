@@ -28,7 +28,7 @@ contract EscrowCloneFactory {
                 _freeflow,
                 isEth
             ));
-
+            
         allClones.push(instance);
         
         require(success);
