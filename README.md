@@ -12,7 +12,7 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 
 
 ## Summary:
-1. git clone 
+1. git clone https://github.com/bmwoolf/escrowFactory.git
 2. npm i
 3. set up environment variables (must be wrapped in qutation marks)
   `RINKEBY_INFURA_ENDPOINT=""`  
