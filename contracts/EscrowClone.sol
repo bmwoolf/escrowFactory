@@ -16,7 +16,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     bool public isETH;
     uint256 public totalAmount;
     uint256 public freeflowCut;
-    IERC20 public tokenContractAddress;
     address public usdcContractAddress;
     address public usdtContractAddress;
 
@@ -47,7 +46,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @notice Need to make it so this can only ever be called once
     function initialize(address payable _client, address payable _dev, address payable _freeflow, bool _isETH) 
-    public payable initializer {
+    public initializer {
         client = _client;
         dev = _dev;
         freeflow = _freeflow;
@@ -64,8 +63,8 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev Transfer ETH from the client to this smart contract
     function depositETH() public payable onlyClient {
         require(msg.value > 0, "Cannot deposit 0 ETH.");
-
-        isETH = true;
+        require(isETH, "Escrow is only set up for ETH deposits");
+        
         totalAmount += msg.value;
 
         emit Deposit(msg.sender, msg.value);
@@ -77,9 +76,9 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     function depositERC20(uint256 _amount, address _tokenAddress) public onlyClient {
         require(_amount > 0, "Cannot deposit 0 tokens.");
         require(_tokenAddress == usdcContractAddress || _tokenAddress == usdtContractAddress, "Must be USDC or USDT");
-        
+        require(!isETH, "Escrow is only set up for ERC20 deposits");
+
         SafeERC20.safeTransferFrom(IERC20(_tokenAddress), msg.sender, address(this), _amount);
-        tokenContractAddress = IERC20(_tokenAddress);
 
         totalAmount += _amount;
 
@@ -87,14 +86,15 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     }
 
     /// @dev   Transfer from this smart contract to the dev
-    // function withdrawETH(uint256 withdrawAmount) public onlyFreeflowOrClient nonReentrant {
-    function withdrawETH() onlyFreeflowOrClient nonReentrant public payable {
-        require(address(this).balance >= msg.value, "Trying to withdraw more ETH than in the contract");
-        uint256 freeflowShare = msg.value / 100 * freeflowCut;
-        uint256 devShare = msg.value - freeflowShare;
+    function withdrawETH(uint256 _amount) onlyFreeflowOrClient nonReentrant public {
+        require(address(this).balance >= _amount, "Trying to withdraw more ETH than in the contract");
+        uint256 freeflowShare = _amount / 100 * freeflowCut;
+        uint256 devShare = _amount - freeflowShare;
         
         freeflow.transfer(freeflowShare);
         dev.transfer(devShare);
+
+        totalAmount -= (freeflowShare + devShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
@@ -102,17 +102,17 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @dev   Transfer ERC20 token from this smart contract to the dev
     /// @param _amount The amount to withdraw for the client
-    function withdrawERC20(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
-        uint256 contractERC20Balance = tokenContractAddress.balanceOf(address(this));
+    function withdrawERC20(uint256 _amount, IERC20 _tokenAddress) public onlyFreeflowOrClient nonReentrant {
+        uint256 contractERC20Balance = _tokenAddress.balanceOf(address(this));
         require (contractERC20Balance >= _amount, "Trying to withdraw more ERC20s than in the contract");
         uint256 freeflowShare = _amount / 100 * freeflowCut;
-        totalAmount -= freeflowShare;
         uint256 devShare = _amount - freeflowShare;
-        totalAmount -= devShare;
+        
+        totalAmount -= (devShare + freeflowShare);
 
-        SafeERC20.safeApprove(tokenContractAddress, address(this), _amount); 
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), dev, devShare);
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), freeflow, freeflowShare);
+        SafeERC20.safeApprove(_tokenAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(_tokenAddress, address(this), dev, devShare);
+        SafeERC20.safeTransferFrom(_tokenAddress, address(this), freeflow, freeflowShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
@@ -123,37 +123,50 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     //////////////////////////////////////////////////
 
     /// @dev Transfer from this smart contract to the client
-    function refundClientAll() public onlyFreeflow nonReentrant {
+    function refundClientAllETH() public onlyFreeflow nonReentrant {
+        require(isETH, "Escrow is only set up for ETH");
+        require(address(this).balance >= totalAmount, "No ETH to withdraw");
         uint256 tempTotalAmount = totalAmount;
         totalAmount = 0;
-        if (!isETH) {
-            SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), tempTotalAmount); 
-            SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client,  tempTotalAmount);
-        } else {
-            client.transfer(tempTotalAmount);
-        }
+            
+        client.transfer(tempTotalAmount);
 
         emit Refund(client, tempTotalAmount);
     }
 
+
     /// @dev   Refund only a specific amount to the client
     /// @param _amount The amount to refund
-    function refundClientMilestone(uint256 _amount) public onlyFreeflow nonReentrant {
+    function refundClientMilestoneETH(uint256 _amount) public onlyFreeflow nonReentrant {
+        require(isETH, "Escrow is only set up for ETH");
+        require(address(this).balance >= _amount, "Cannot refund more than the total amount of ETH");
+        
         totalAmount -= _amount;
-        if (!isETH) {
-            SafeERC20.safeApprove(IERC20(tokenContractAddress), address(this), _amount); 
-            SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client, _amount);
-        } else if (isETH) {
-            require(_amount <= address(this).balance, "Cannot refund more than the total amount.");
-            client.transfer(_amount);
-        }
+        client.transfer(_amount);
 
         emit Refund(client, _amount);
     }
 
-    /// @dev Deletes the contract and returns funds to _receiver
-    /// @param _receiver address of wallet to return contract funds to
-    function killContract(address _receiver) public onlyFreeflow nonReentrant {
-        selfdestruct(payable(_receiver));
+    /// @dev Transfer from this smart contract to the client
+    function refundClientAllERC20(IERC20 _tokenAddress) public onlyFreeflow nonReentrant {
+        require(!isETH, "Escrow is only set up for ERC20");
+        uint256 tempTotalAmount = totalAmount;
+        totalAmount = 0;
+
+        SafeERC20.safeApprove(_tokenAddress, address(this), tempTotalAmount); 
+        SafeERC20.safeTransferFrom(_tokenAddress, address(this), client,  tempTotalAmount);
+
+        emit Refund(client, tempTotalAmount);
+    }
+
+    function refundClientMilestoneERC20(uint256 _amount, IERC20 _tokenAddress) public onlyFreeflow nonReentrant {
+        require(!isETH, "Escrow is only set up for ERC20");
+        require(_tokenAddress.balanceOf(address(this)) >= _amount, "Cannot refund more than the total amount of ETH");
+        totalAmount -= _amount;
+        
+        SafeERC20.safeApprove(_tokenAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(_tokenAddress, address(this), client, _amount);
+
+        emit Refund(client, _amount);
     }
 }
