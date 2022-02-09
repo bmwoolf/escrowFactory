@@ -150,10 +150,4 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
         emit Refund(client, _amount);
     }
-
-    /// @dev Deletes the contract and returns funds to _receiver
-    /// @param _receiver address of wallet to return contract funds to
-    function killContract(address _receiver) public onlyFreeflow nonReentrant {
-        selfdestruct(payable(_receiver));
-    }
 }
