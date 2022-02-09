@@ -10,6 +10,7 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 * `interactUSDC.js` will do the same with 1 USD coin.
 
 
+
 ## Summary:
 1. git clone 
 2. npm i
@@ -22,6 +23,8 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 4. modify `createNewEscrow()` and pass in `client`, `dev`, `freeFlow`, and `true` or `false` if the escrow contract deals in ether or not
 5. `npx hardhat run scripts/deployNewEscrowEthAndERC20.js --network rinkeby`
 6. `npx hardhat verify [contract_address] --network rinkeby` (run this for both contracts)
+
+
 
 ## Other Notes
 * **The current contract is setup pointing to Rinkeby addresses for USDC and USDT, replace them with mainnet addresses before deploying to mainnet!!!!**
