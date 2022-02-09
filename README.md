@@ -9,6 +9,20 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 * `interactUSDT.js` will do the same with 1 Tether coin.
 * `interactUSDC.js` will do the same with 1 USD coin.
 
+
+## Summary:
+1. git clone 
+2. npm i
+3. set up environment variables (must be wrapped in qutation marks)
+  `RINKEBY_INFURA_ENDPOINT=""`  
+  `RINKEBY_PRIVATE_KEY=""`  
+  `ETHERSCAN_KEY=""`  
+  `PRIVATE_KEY1=""`  
+  `PRIVATE_KEY2=""`  
+4. modify `createNewEscrow()` and pass in `client`, `dev`, `freeFlow`, and `true` or `false` if the escrow contract deals in ether or not
+5. `npx hardhat run scripts/deployNewEscrowEthAndERC20.js --network rinkeby`
+6. `npx hardhat verify [contract_address] --network rinkeby` (run this for both contracts)
+
 ## Other Notes
 * **The current contract is setup pointing to Rinkeby addresses for USDC and USDT, replace them with mainnet addresses before deploying to mainnet!!!!**
 * Be congnicent that you will need to account for the correct decimals, e.g. Ethereum is 1^18 while USDT/USDC are 1^6 (for some reason testnet USDT is 1^18). There are tools in `ethers.js` to help you with this or you can do the math if interacting with the variable inputs for the functions on Etherscan.
@@ -21,7 +35,7 @@ If you want to use some of the scripts that are setup to test on rinkeby (or tra
 
 ## .env setup
 
-`RINKEBY_URL=`  
+`RINKEBY_INFURA_ENDPOINT=`  
 `RINKEBY_PRIVATE_KEY=`  
 `ETHERSCAN_KEY=`  
 `PRIVATE_KEY1=`  
