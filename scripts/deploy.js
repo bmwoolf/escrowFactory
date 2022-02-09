@@ -6,9 +6,7 @@ async function main() {
   const escrowClone = await EscrowClone.deploy();
   await escrowClone.deployed();
 
-  const EscrowCloneFactory = await ethers.getContractFactory(
-    "EscrowCloneFactory"
-  );
+  const EscrowCloneFactory = await ethers.getContractFactory("EscrowCloneFactory");
   const ecf = await EscrowCloneFactory.deploy(escrowClone.address);
   await ecf.deployed();
 
