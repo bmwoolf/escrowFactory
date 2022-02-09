@@ -2,8 +2,8 @@
 
 
 ## TLDR
-1. git clone https://github.com/bmwoolf/escrowFactory.git
-2. npm i
+1. `git clone https://github.com/bmwoolf/escrowFactory.git`
+2. `npm i`
 3. set up environment variables (must be wrapped in qutation marks)
   `RINKEBY_INFURA_ENDPOINT=""`  
   `RINKEBY_PRIVATE_KEY=""`  
