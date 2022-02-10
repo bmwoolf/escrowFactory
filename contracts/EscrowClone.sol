@@ -54,7 +54,8 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         isETH = _isETH;
         freeflowCut = 15;
         usdcContractAddress = 0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b;
-        usdtContractAddress = 0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02;
+        //usdtContractAddress = 0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02;
+        usdtContractAddress = 0x13512979ADE267AB5100878E2e0f485B568328a4; // kovan usdt
     }
 
     //////////////////////////////////////////////////
@@ -63,6 +64,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @dev Transfer ETH from the client to this smart contract
     function depositETH() public payable onlyClient {
+        require(isETH, "Contract set up for ETH");
         require(msg.value > 0, "Cannot deposit 0 ETH.");
         
         totalAmount += msg.value;
@@ -74,6 +76,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @param _amount The new amount to deposit
     /// @param _tokenAddress The address of the token to deposit
     function depositERC20(uint256 _amount, address _tokenAddress) public onlyClient {
+        require(!isETH, "Contract set up for ERC20s");
         require(_amount > 0, "Cannot deposit 0 tokens.");
         require(_tokenAddress == usdcContractAddress || _tokenAddress == usdtContractAddress, "Must be USDC or USDT");
 
@@ -88,6 +91,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
     /// @dev   Transfer from this smart contract to the dev
     function withdrawETH(uint256 _amount) onlyFreeflowOrClient nonReentrant public {
+        require(isETH, "Contract set up for ETH");
         require(address(this).balance >= _amount, "Trying to withdraw more ETH than in the contract");
         uint256 freeflowShare = _amount / 100 * freeflowCut;
         uint256 devShare = _amount - freeflowShare;
@@ -104,6 +108,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /// @dev   Transfer ERC20 token from this smart contract to the dev
     /// @param _amount The amount to withdraw for the client
     function withdrawERC20(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
+        require(!isETH, "Contract set up for ERC20s");
         uint256 contractERC20Balance = tokenContractAddress.balanceOf(address(this));
         require (contractERC20Balance >= _amount, "Trying to withdraw more ERC20s than in the contract");
         uint256 freeflowShare = _amount / 100 * freeflowCut;
