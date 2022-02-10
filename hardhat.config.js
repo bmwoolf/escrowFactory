@@ -4,9 +4,10 @@ require("@nomiclabs/hardhat-etherscan");
 
 // const KOVAN_INFURA_ENDPOINT = process.env.KOVAN_INFURA_ENDPOINT;
 const RINKEBY_INFURA_ENDPOINT = process.env.RINKEBY_INFURA_ENDPOINT;
+const KOVAN_INFURA_ENDPOINT = process.env.KOVAN_INFURA_ENDPOINT;
 const ETHERSCAN_API = process.env.ETHERSCAN_API;
-const PRIVATE_KEY1 = process.env.PRIVATE_KEY1;
-const PRIVATE_KEY2 = process.env.PRIVATE_KEY2;
+const CLIENT_PRIVATE_KEY = process.env.CLIENT_PRIVATE_KEY;
+const DEV_PRIVATE_KEY = process.env.DEV_PRIVATE_KEY;
 
 module.exports = {
   defaultNetwork: "rinkeby",
@@ -14,13 +15,14 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    // kovan: {
-    //   url: KOVAN_INFURA_ENDPOINT,
-    //   accounts: [PRIVATE_KEY1, PRIVATE_KEY2],
-    // },
     rinkeby: {
       url: RINKEBY_INFURA_ENDPOINT,
-      accounts: [PRIVATE_KEY1, PRIVATE_KEY2],
+      accounts: [CLIENT_PRIVATE_KEY, DEV_PRIVATE_KEY],
+      gas: "auto",
+    },
+    kovan: {
+      url: KOVAN_INFURA_ENDPOINT,
+      accounts: [CLIENT_PRIVATE_KEY, DEV_PRIVATE_KEY],
       gas: "auto",
     },
   },
