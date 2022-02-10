@@ -8,7 +8,7 @@
   `ETHERSCAN_KEY=""`  
   `PRIVATE_KEY1=""`  
 5. `npx hardhat run scripts/deploy.js --network rinkeby`
-(You will need an infura key for mainnet when deploying to mainnet)
+(You will need an infura key for mainnet and add mainnet under networks in `hardhat.config.js` when deploying to mainnet)
 
 If you want to use some of the scripts that are setup to test on rinkeby (or transform them for real deployment / interaction), first replace `ESCROW_CLONE` address in the javascript files with your new respective escrow contract address after generating a new escrow contract on etherscan (or hardhat if you want to use `createNewEscrow()` in the deploy script or new script etc.)
 
