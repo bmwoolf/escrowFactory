@@ -45,7 +45,6 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         _;
     }
 
-    /// @notice Need to make it so this can only ever be called once
     function initialize(address payable _client, address payable _dev, address payable _freeflow, bool _isETH) 
     public initializer {
         client = _client;
