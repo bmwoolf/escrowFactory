@@ -53,8 +53,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         isETH = _isETH;
         freeflowCut = 15;
         usdcContractAddress = 0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b;
-        //usdtContractAddress = 0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02;
-        usdtContractAddress = 0x13512979ADE267AB5100878E2e0f485B568328a4; // kovan usdt
+        usdtContractAddress = 0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02;
     }
 
     //////////////////////////////////////////////////
