@@ -17,17 +17,13 @@ contract EscrowCloneFactory {
     }
 
     /// @dev Client deploys the escrow contract
-    function createNewEscrow(address payable _client, address payable _dev, address payable _freeflow, bool isEth) external returns (address instance) {
+    function createNewEscrow(address payable _client, address payable _dev, address payable _freeflow) 
+    external returns (address instance) {
         instance = Clones.clone(implementationContract);
         
         (bool success,) = instance.call(
-            abi.encodeWithSignature(
-                "initialize(address,address,address,bool)", 
-                _client,
-                _dev,
-                _freeflow,
-                isEth
-            ));
+            abi.encodeWithSignature("initialize(address,address,address)", _client ,_dev, _freeflow)
+        );
             
         allClones.push(instance);
         

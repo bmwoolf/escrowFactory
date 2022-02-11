@@ -14,11 +14,9 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     address payable public dev;
     address payable public freeflow;
     bool public isETH;
-    uint256 public totalAmount;
     uint256 public freeflowCut;
-    IERC20 public tokenContractAddress;
-    address public usdcContractAddress;
-    address public usdtContractAddress;
+    IERC20 public usdcContractAddress;
+    IERC20 public usdtContractAddress;
 
     event Deposit(address client, uint256 amount);
     event DevWithdrawal(address dev, uint256 amount);
@@ -52,8 +50,9 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         freeflow = _freeflow;
         isETH = _isETH;
         freeflowCut = 15;
-        usdcContractAddress = 0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b;
-        usdtContractAddress = 0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02;
+        usdcContractAddress = IERC20(0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b);
+        // usdtContractAddress = IERC20(0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02);
+        usdtContractAddress = IERC20(0x13512979ADE267AB5100878E2e0f485B568328a4); // kovan usdt
     }
 
     //////////////////////////////////////////////////
@@ -65,27 +64,31 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         require(isETH, "Contract set up for ETH");
         require(msg.value > 0, "Cannot deposit 0 ETH.");
         
-        totalAmount += msg.value;
-
         emit Deposit(msg.sender, msg.value);
     }
 
-    /// @dev   Transfer ERC20 token from the client to this smart contract
+    /// @dev   Transfer USDT token from the client to this smart contract
     /// @param _amount The new amount to deposit
-    /// @param _tokenAddress The address of the token to deposit
-    function depositERC20(uint256 _amount, address _tokenAddress) public onlyClient {
+    function depositUSDT(uint256 _amount) public onlyClient {
         require(!isETH, "Contract set up for ERC20s");
         require(_amount > 0, "Cannot deposit 0 tokens.");
-        require(_tokenAddress == usdcContractAddress || _tokenAddress == usdtContractAddress, "Must be USDC or USDT");
 
-        SafeERC20.safeTransferFrom(IERC20(_tokenAddress), msg.sender, address(this), _amount);
+        SafeERC20.safeTransferFrom(usdtContractAddress, msg.sender, address(this), _amount);
         
-        tokenContractAddress = IERC20(_tokenAddress);
-
-        totalAmount += _amount;
-
         emit Deposit(msg.sender, _amount);
     }
+
+    /// @dev   Transfer USDC token from the client to this smart contract
+    /// @param _amount The new amount to deposit 
+    function depositUSDC(uint256 _amount) public onlyClient {
+        require(!isETH, "Contract set up for ERC20s");
+        require(_amount > 0, "Cannot deposit 0 tokens.");
+
+        SafeERC20.safeTransferFrom(usdcContractAddress, msg.sender, address(this), _amount);
+        
+        emit Deposit(msg.sender, _amount);
+    }
+
 
     /// @dev   Transfer from this smart contract to the dev
     function withdrawETH(uint256 _amount) onlyFreeflowOrClient nonReentrant public {
@@ -97,26 +100,42 @@ contract EscrowClone is ReentrancyGuard, Initializable {
         freeflow.transfer(freeflowShare);
         dev.transfer(devShare);
 
-        totalAmount -= (freeflowShare + devShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
     }
 
-    /// @dev   Transfer ERC20 token from this smart contract to the dev
+    /// @dev   Transfer USDT token from this smart contract to the dev
     /// @param _amount The amount to withdraw for the client
-    function withdrawERC20(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
+    function withdrawUSDT(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
         require(!isETH, "Contract set up for ERC20s");
-        uint256 contractERC20Balance = tokenContractAddress.balanceOf(address(this));
-        require (contractERC20Balance >= _amount, "Trying to withdraw more ERC20s than in the contract");
+        uint256 contractUsdtBalance = usdtContractAddress.balanceOf(address(this));
+        require (contractUsdtBalance >= _amount, "Trying to withdraw more USDT than in the contract");
         uint256 freeflowShare = _amount / 100 * freeflowCut;
         uint256 devShare = _amount - freeflowShare;
         
-        totalAmount -= (devShare + freeflowShare);
 
-        SafeERC20.safeApprove(tokenContractAddress, address(this), _amount); 
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), dev, devShare);
-        SafeERC20.safeTransferFrom(tokenContractAddress, address(this), freeflow, freeflowShare);
+        SafeERC20.safeApprove(usdtContractAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(usdtContractAddress, address(this), dev, devShare);
+        SafeERC20.safeTransferFrom(usdtContractAddress, address(this), freeflow, freeflowShare);
+
+        emit DevWithdrawal(dev, devShare);
+        emit FreeflowWithdrawal(freeflow, freeflowShare);
+    }
+
+    /// @dev   Transfer USDC token from this smart contract to the dev
+    /// @param _amount The amount to withdraw for the client
+    function withdrawUSDC(uint256 _amount) public onlyFreeflowOrClient nonReentrant {
+        require(!isETH, "Contract set up for ERC20s");
+        uint256 contractUsdcBalance = usdcContractAddress.balanceOf(address(this));
+        require (contractUsdcBalance >= _amount, "Trying to withdraw more USDC than in the contract");
+        uint256 freeflowShare = _amount / 100 * freeflowCut;
+        uint256 devShare = _amount - freeflowShare;
+        
+
+        SafeERC20.safeApprove(usdcContractAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(usdcContractAddress, address(this), dev, devShare);
+        SafeERC20.safeTransferFrom(usdcContractAddress, address(this), freeflow, freeflowShare);
 
         emit DevWithdrawal(dev, devShare);
         emit FreeflowWithdrawal(freeflow, freeflowShare);
@@ -126,31 +145,35 @@ contract EscrowClone is ReentrancyGuard, Initializable {
     /////////            REFUNDS            //////////
     //////////////////////////////////////////////////
 
-    /// @dev Transfer from this smart contract to the client
-    function refundClientAll() public onlyFreeflow nonReentrant {
-        uint256 tempTotalAmount = totalAmount;
-        totalAmount = 0;
-        if (!isETH) {
-            SafeERC20.safeApprove(tokenContractAddress, address(this), tempTotalAmount); 
-            SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client,  tempTotalAmount);
-        } else {
-            client.transfer(tempTotalAmount);
-        }
-
-        emit Refund(client, tempTotalAmount);
-    }
-
     /// @dev   Refund only a specific amount to the client
     /// @param _amount The amount to refund
-    function refundClientMilestone(uint256 _amount) public onlyFreeflow nonReentrant {
-        totalAmount -= _amount;
-        if (!isETH) {
-            SafeERC20.safeApprove(tokenContractAddress, address(this), _amount); 
-            SafeERC20.safeTransferFrom(tokenContractAddress, address(this), client, _amount);
-        } else if (isETH) {
-            require(address(this).balance >= _amount, "Cannot refund more than the total amount.");
-            client.transfer(_amount);
-        }
+    function refundClientMilestoneETH(uint256 _amount) public onlyFreeflow nonReentrant {
+        require(address(this).balance >= _amount, "Cannot refund more than the total amount.");
+        client.transfer(_amount);
+
+        emit Refund(client, _amount);
+    }
+    
+    /// @dev   Refund a specific amount of USDT to the client
+    /// @param _amount The amount to refund
+    function refundClientMilestoneUSDT(uint256 _amount) public onlyFreeflow nonReentrant {
+        uint256 contractUsdtBalance = usdtContractAddress.balanceOf(address(this));
+        require (contractUsdtBalance >= _amount, "Trying to refund more USDT than in the contract");
+
+        SafeERC20.safeApprove(usdtContractAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(usdtContractAddress, address(this), client, _amount);
+
+        emit Refund(client, _amount);
+    }
+    
+    /// @dev   Refund a specific amount of USDT to the client
+    /// @param _amount The amount to refund
+    function refundClientMilestoneUSDC(uint256 _amount) public onlyFreeflow nonReentrant {
+        uint256 contractUsdcBalance = usdcContractAddress.balanceOf(address(this));
+        require (contractUsdcBalance >= _amount, "Trying to refund more USDC than in the contract");
+
+        SafeERC20.safeApprove(usdcContractAddress, address(this), _amount); 
+        SafeERC20.safeTransferFrom(usdcContractAddress, address(this), client, _amount);
 
         emit Refund(client, _amount);
     }
