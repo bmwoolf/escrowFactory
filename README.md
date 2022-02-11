@@ -3,7 +3,7 @@
 ## Setup
 1. `git clone https://github.com/bmwoolf/escrowFactory.git`
 2. `npm i`
-3. set up environment variables 
+3. set up environment variables  
   `RINKEBY_INFURA_ENDPOINT=""`  
   `ETHERSCAN_KEY=""`  
   `PRIVATE_KEY1=""`  
