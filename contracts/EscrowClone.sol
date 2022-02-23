@@ -169,4 +169,7 @@ contract EscrowClone is ReentrancyGuard, Initializable {
 
         emit Refund(client, _amount);
     }
+
+    /// @dev Allows people to deposit directly to the contract
+    receive() external payable {}
 }
